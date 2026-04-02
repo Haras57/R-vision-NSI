@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Révision NSI/SNT Interactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        warmBg: '#FDFBF7',
+                        warmCard: '#F5F0EB',
+                        warmBorder: '#E2D8CE',
+                        textMain: '#2D3748',
+                        textMuted: '#4A5568',
+                        accent: '#2C7A7B',
+                        accentHover: '#285E61',
+                        codeBg: '#1A202C',
+                        codeText: '#A0AEC0'
+                    },
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                        mono: ['Consolas', 'Monaco', 'Courier New', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-warmBg text-textMain font-sans min-h-screen">
+
+    <!-- Chosen Palette: Warm Neutrals with Soft Teal Accents -->
+    <!-- Application Structure Plan: A tabbed interface categorizing the four main NSI/SNT revision topics. This compartmentalized dashboard structure reduces cognitive load, allowing the user to focus on one subject area at a time. Each tab features interactive simulations (visual DOM tree, dynamic chart, live arrays, simulated terminal) to encourage active learning and directly apply the source material concepts. -->
+    <!-- Visualization & Content Choices: CSV Data -> Goal: Inform & Organize -> Viz: Bar Chart -> Interaction: View visual representation of text data -> Justification: Illustrates the transformation of raw CSV text into structured, visual data. Library: Chart.js. Confirming NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <div class="max-w-5xl mx-auto px-4 py-8">
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl font-bold text-textMain mb-3">🎓 Plateforme de Révision NSI/SNT</h1>
+            <p class="text-lg text-textMuted max-w-2xl mx-auto">Explorez les concepts fondamentaux du Web, de l'analyse de données, de la programmation Python et de la navigation en terminal à travers des modules interactifs.</p>
+        </header>
+
+        <nav class="flex flex-wrap justify-center gap-2 mb-8 bg-warmCard p-2 rounded-xl shadow-sm border border-warmBorder">
+            <button onclick="switchTab('web')" id="btn-web" class="nav-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-accent text-white shadow-md">🌐 Web (HTML/CSS)</button>
+            <button onclick="switchTab('csv')" id="btn-csv" class="nav-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 text-textMuted hover:bg-white">📊 Données (CSV)</button>
+            <button onclick="switchTab('python')" id="btn-python" class="nav-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 text-textMuted hover:bg-white">🐍 Python</button>
+            <button onclick="switchTab('terminal')" id="btn-terminal" class="nav-btn px-6 py-3 rounded-lg font-medium transition-all duration-200 text-textMuted hover:bg-white">💻 Terminal</button>
+        </nav>
+
+        <main class="bg-white rounded-2xl shadow-sm border border-warmBorder p-6 md:p-8">
+
+            <section id="tab-web" class="tab-content active">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-2 flex items-center gap-2">🌐 Structure du Web</h2>
+                    <p class="text-textMuted">Cette section illustre la structure fondamentale d'une page Web et la manière dont les éléments sont ciblés. Interagissez avec les boutons de sélecteurs CSS ci-dessous pour voir comment ils mettent en évidence les différentes parties de la hiérarchie HTML (balises, classes, et identifiants uniques).</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-warmCard p-5 rounded-xl border border-warmBorder">
+                        <h3 class="text-xl font-semibold mb-4 border-b border-warmBorder pb-2">Sélecteurs CSS</h3>
+                        <p class="mb-4 text-sm text-textMuted">Cliquez pour appliquer le style et cibler les éléments dans l'arbre HTML.</p>
+                        
+                        <div class="space-y-3">
+                            <button onclick="highlightHTML('tag')" class="w-full text-left px-4 py-3 bg-white border border-warmBorder rounded hover:border-accent transition-colors">
+                                <span class="font-mono text-accent font-bold">p { ... }</span>
+                                <span class="block text-sm text-textMuted mt-1">Cible toutes les balises &lt;p&gt;</span>
+                            </button>
+                            <button onclick="highlightHTML('class')" class="w-full text-left px-4 py-3 bg-white border border-warmBorder rounded hover:border-accent transition-colors">
+                                <span class="font-mono text-accent font-bold">.important { ... }</span>
+                                <span class="block text-sm text-textMuted mt-1">Cible les éléments avec class="important"</span>
+                            </button>
+                            <button onclick="highlightHTML('id')" class="w-full text-left px-4 py-3 bg-white border border-warmBorder rounded hover:border-accent transition-colors">
+                                <span class="font-mono text-accent font-bold">#titre-principal { ... }</span>
+                                <span class="block text-sm text-textMuted mt-1">Cible l'élément unique avec id="titre-principal"</span>
+                            </button>
+                            <button onclick="highlightHTML('reset')" class="w-full text-center px-4 py-2 mt-4 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors text-sm">
+                                🔄 Réinitialiser
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-codeBg text-codeText p-5 rounded-xl font-mono text-sm shadow-inner overflow-x-auto">
+                        <div class="mb-2 html-element text-white">&lt;html&gt;</div>
+                        <div class="ml-4 border-l border-gray-600 pl-4 py-1">
+                            <div class="mb-2 html-element text-blue-300">&lt;head&gt;</div>
+                            <div class="ml-4 mb-2 html-element text-gray-400">&lt;title&gt;Ma Page&lt;/title&gt;</div>
+                            <div class="ml-4 mb-2 html-element text-gray-400">&lt;style&gt; ... &lt;/style&gt;</div>
+                            <div class="html-element text-blue-300">&lt;/head&gt;</div>
+                        </div>
+                        <div class="ml-4 border-l border-gray-600 pl-4 py-1 mt-2">
+                            <div class="mb-2 html-element text-green-300">&lt;body&gt;</div>
+                            
+                            <div id="html-id-target" class="ml-4 mb-2 p-1 rounded transition-colors html-element text-gray-300">
+                                &lt;h1 id="titre-principal"&gt;Le Web&lt;/h1&gt;
+                            </div>
+                            
+                            <div class="html-tag-target ml-4 mb-2 p-1 rounded transition-colors html-element text-gray-300">
+                                &lt;p&gt;Un paragraphe normal.&lt;/p&gt;
+                            </div>
+                            
+                            <div class="html-tag-target html-class-target ml-4 mb-2 p-1 rounded transition-colors html-element text-gray-300">
+                                &lt;p class="important"&gt;Un concept crucial.&lt;/p&gt;
+                            </div>
+                            
+                            <div class="html-element text-green-300">&lt;/body&gt;</div>
+                        </div>
+                        <div class="mt-2 html-element text-white">&lt;/html&gt;</div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-csv" class="tab-content">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-2 flex items-center gap-2">📊 Manipulation de Fichiers CSV</h2>
+                    <p class="text-textMuted">Découvrez comment un simple fichier texte séparé par des virgules (CSV) se traduit en données structurées exploitables. Cette section compare la vue brute d'un fichier CSV avec son interprétation visuelle à l'aide d'un graphique dynamique. En Python, <code>csv.DictReader</code> transforme chaque ligne de ce fichier en dictionnaire.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 bg-warmCard p-5 rounded-xl border border-warmBorder">
+                        <h3 class="text-lg font-semibold mb-3">Données brutes (Texte)</h3>
+                        <pre class="bg-codeBg text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto shadow-inner">Nom,Note
+Alice,16
+Bob,14
+Charlie,18
+Diana,12
+Eve,15</pre>
+                        <div class="mt-4 p-4 bg-white rounded-lg border border-warmBorder">
+                            <h4 class="font-semibold text-sm mb-2">Clés de dictionnaire Python :</h4>
+                            <p class="text-sm text-textMuted">Une fois lu par Python, l'accès à la note d'Alice se ferait via la syntaxe :</p>
+                            <code class="block mt-2 bg-gray-100 p-2 rounded text-accent font-mono text-sm">eleve['Note']</code>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-warmBorder shadow-sm flex flex-col items-center justify-center">
+                        <h3 class="text-lg font-semibold mb-4 w-full text-left">Représentation Graphique des Données</h3>
+                        <div class="chart-container">
+                            <canvas id="csvChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-python" class="tab-content">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-2 flex items-center gap-2">🐍 Structures de Données Python</h2>
+                    <p class="text-textMuted">Expérimentez avec les deux structures de données principales en Python : les Listes (indexées à partir de 0) et les Dictionnaires (système de paires clé/valeur). Utilisez les actions interactives pour modifier ces structures en temps réel et comprendre leur fonctionnement en mémoire.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-warmCard p-5 rounded-xl border border-warmBorder">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">📦 Les Listes</h3>
+                        <p class="text-sm text-textMuted mb-4">Ordonnées et indexées. L'indexation commence à <strong>0</strong>.</p>
+                        
+                        <div class="bg-white p-4 rounded-lg border border-warmBorder mb-4 text-center">
+                            <div class="font-mono text-lg mb-2" id="python-list-display">L = [10, 12]</div>
+                            <div class="flex justify-center gap-2 text-xs text-gray-400 font-mono" id="python-list-indexes">
+                                <span>idx:0</span>
+                                <span>idx:1</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button onclick="appendToList()" class="flex-1 bg-accent text-white px-4 py-2 rounded hover:bg-accentHover transition-colors font-mono text-sm">
+                                L.append(14)
+                            </button>
+                            <button onclick="resetList()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition-colors text-sm">
+                                🔄
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-warmCard p-5 rounded-xl border border-warmBorder">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">🏷️ Les Dictionnaires</h3>
+                        <p class="text-sm text-textMuted mb-4">Stockage par paires <strong>Clé : Valeur</strong>.</p>
+
+                        <div class="bg-white p-4 rounded-lg border border-warmBorder mb-4">
+                            <pre class="font-mono text-sm" id="python-dict-display">eleve = {
+  'nom': 'Alice',
+  'option': 'NSI'
+}</pre>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button onclick="updateDict()" class="flex-1 bg-accent text-white px-4 py-2 rounded hover:bg-accentHover transition-colors font-mono text-sm">
+                                eleve['option'] = 'SNT'
+                            </button>
+                            <button onclick="resetDict()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition-colors text-sm">
+                                🔄
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-terminal" class="tab-content">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-2 flex items-center gap-2">💻 Navigation en Terminal</h2>
+                    <p class="text-textMuted">Le terminal permet de naviguer dans l'arborescence de votre ordinateur via des lignes de commande textuelles. Interagissez avec l'émulateur de terminal ci-dessous en cliquant sur les commandes pour visualiser leurs effets sur le répertoire de travail actuel et explorer les fichiers.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-1 bg-warmCard p-5 rounded-xl border border-warmBorder flex flex-col gap-3">
+                        <h3 class="font-semibold mb-2">Commandes</h3>
+                        <button onclick="runCommand('pwd')" class="text-left px-4 py-2 bg-white border border-warmBorder rounded hover:border-accent transition-colors font-mono text-sm">
+                            <span class="font-bold text-accent">pwd</span> (Où suis-je ?)
+                        </button>
+                        <button onclick="runCommand('ls')" class="text-left px-4 py-2 bg-white border border-warmBorder rounded hover:border-accent transition-colors font-mono text-sm">
+                            <span class="font-bold text-accent">ls</span> (Lister le contenu)
+                        </button>
+                        <button onclick="runCommand('cd Exercices')" class="text-left px-4 py-2 bg-white border border-warmBorder rounded hover:border-accent transition-colors font-mono text-sm" id="btn-cd-in">
+                            <span class="font-bold text-accent">cd Exercices</span> (Entrer)
+                        </button>
+                        <button onclick="runCommand('cd ..')" class="text-left px-4 py-2 bg-white border border-warmBorder rounded hover:border-accent transition-colors font-mono text-sm opacity-50 cursor-not-allowed" id="btn-cd-out" disabled>
+                            <span class="font-bold text-accent">cd ..</span> (Remonter)
+                        </button>
+                        <button onclick="runCommand('clear')" class="text-center px-4 py-2 mt-auto bg-gray-700 text-white rounded hover:bg-gray-800 transition-colors font-mono text-sm">
+                            clear
+                        </button>
+                    </div>
+
+                    <div class="md:col-span-2 bg-codeBg p-4 rounded-xl shadow-inner font-mono text-sm text-green-400 h-80 overflow-y-auto flex flex-col" id="terminal-output">
+                        <div class="mb-2 text-gray-400">Terminal Emulator v1.0</div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-blue-400">user@machine</span><span class="text-white">:</span><span class="text-blue-200" id="term-path">~/Devoirs</span><span class="text-white">$</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-accent', 'text-white', 'shadow-md');
+                el.classList.add('text-textMuted', 'hover:bg-white');
+            });
+            document.getElementById('tab-' + tabId).classList.add('active');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('text-textMuted', 'hover:bg-white');
+            activeBtn.classList.add('bg-accent', 'text-white', 'shadow-md');
+        }
+
+        function highlightHTML(type) {
+            document.querySelectorAll('.html-tag-target, .html-class-target, #html-id-target').forEach(el => {
+                el.classList.remove('bg-yellow-500', 'bg-opacity-30', 'border-l-4', 'border-yellow-500');
+            });
+
+            if (type === 'tag') {
+                document.querySelectorAll('.html-tag-target').forEach(el => {
+                    el.classList.add('bg-yellow-500', 'bg-opacity-30', 'border-l-4', 'border-yellow-500');
+                });
+            } else if (type === 'class') {
+                document.querySelectorAll('.html-class-target').forEach(el => {
+                    el.classList.add('bg-yellow-500', 'bg-opacity-30', 'border-l-4', 'border-yellow-500');
+                });
+            } else if (type === 'id') {
+                const el = document.getElementById('html-id-target');
+                if(el) el.classList.add('bg-yellow-500', 'bg-opacity-30', 'border-l-4', 'border-yellow-500');
+            }
+        }
+
+        let csvChartInstance = null;
+        function initChart() {
+            const ctx = document.getElementById('csvChart').getContext('2d');
+            const data = {
+                labels: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'],
+                datasets: [{
+                    label: 'Note (/20)',
+                    data: [16, 14, 18, 12, 15],
+                    backgroundColor: '#2C7A7B',
+                    borderRadius: 4
+                }]
+            };
+            
+            csvChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 20
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Note : ' + context.parsed.y + '/20';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            initChart();
+        });
+
+        let pyList = [10, 12];
+        function renderList() {
+            document.getElementById('python-list-display').innerText = 'L = [' + pyList.join(', ') + ']';
+            let indexHtml = pyList.map((_, i) => '<span>idx:' + i + '</span>').join('  ');
+            document.getElementById('python-list-indexes').innerHTML = indexHtml;
+        }
+        function appendToList() {
+            if (pyList.length < 3) {
+                pyList.push(14);
+                renderList();
+            }
+        }
+        function resetList() {
+            pyList = [10, 12];
+            renderList();
+        }
+
+        let pyDict = { nom: 'Alice', option: 'NSI' };
+        function renderDict() {
+            document.getElementById('python-dict-display').innerText = `eleve = {\n  'nom': '${pyDict.nom}',\n  'option': '${pyDict.option}'\n}`;
+        }
+        function updateDict() {
+            pyDict.option = 'SNT';
+            renderDict();
+        }
+        function resetDict() {
+            pyDict = { nom: 'Alice', option: 'NSI' };
+            renderDict();
+        }
+
+        let currentPath = "~/Devoirs";
+        const fileSystem = {
+            "~/Devoirs": ["Exercices", "rapport.txt", "notes.csv"],
+            "~/Devoirs/Exercices": ["exo1.py", "exo2.html"]
+        };
+
+        function runCommand(cmd) {
+            const term = document.getElementById('terminal-output');
+            
+            if (cmd === 'clear') {
+                term.innerHTML = `<div class="mb-2 text-gray-400">Terminal Emulator v1.0</div>`;
+                appendPrompt();
+                return;
+            }
+
+            const activePrompt = term.lastElementChild;
+            if(activePrompt) {
+                const cmdText = document.createElement('span');
+                cmdText.className = "text-white ml-2";
+                cmdText.innerText = cmd;
+                activePrompt.appendChild(cmdText);
+            }
+
+            const outputLine = document.createElement('div');
+            outputLine.className = "text-gray-300 mt-1 mb-2";
+
+            if (cmd === 'pwd') {
+                outputLine.innerText = currentPath.replace('~', '/home/user');
+            } else if (cmd === 'ls') {
+                outputLine.className = "text-blue-300 mt-1 mb-2 flex gap-4";
+                outputLine.innerText = fileSystem[currentPath].join('   ');
+            } else if (cmd === 'cd Exercices') {
+                if (currentPath === "~/Devoirs") {
+                    currentPath = "~/Devoirs/Exercices";
+                    updateTerminalButtons();
+                } else {
+                    outputLine.innerText = "cd: Exercices: No such file or directory";
+                }
+            } else if (cmd === 'cd ..') {
+                if (currentPath === "~/Devoirs/Exercices") {
+                    currentPath = "~/Devoirs";
+                    updateTerminalButtons();
+                }
+            }
+
+            if (outputLine.innerText !== "") {
+                term.appendChild(outputLine);
+            }
+
+            appendPrompt();
+            term.scrollTop = term.scrollHeight;
+        }
+
+        function appendPrompt() {
+            const term = document.getElementById('terminal-output');
+            const prompt = document.createElement('div');
+            prompt.className = "flex items-center gap-2 mt-1";
+            prompt.innerHTML = `<span class="text-blue-400">user@machine</span><span class="text-white">:</span><span class="text-blue-200">${currentPath}</span><span class="text-white">$</span>`;
+            term.appendChild(prompt);
+        }
+
+        function updateTerminalButtons() {
+            const btnIn = document.getElementById('btn-cd-in');
+            const btnOut = document.getElementById('btn-cd-out');
+            
+            if (currentPath === "~/Devoirs") {
+                btnIn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnIn.disabled = false;
+                btnOut.classList.add('opacity-50', 'cursor-not-allowed');
+                btnOut.disabled = true;
+            } else {
+                btnIn.classList.add('opacity-50', 'cursor-not-allowed');
+                btnIn.disabled = true;
+                btnOut.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnOut.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
